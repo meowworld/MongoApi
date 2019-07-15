@@ -1,0 +1,82 @@
+
+在Java中使用Mongo 
+
+pom依赖
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+
+在代码中注入mongoTemplate spring集成的模板类操作方便
+
+  private MongoTemplate mongoTemplate;
+  private static final String COLLECTION_NAME = "DALI_GROUP_SENCE_COLLECTION";
+
+
+  保存：
+    mongoTemplate.save(data, COLLECTION_NAME);
+  标准查询：
+    Criteria criteria = Criteria.where("user_id").is(userId).and("hub_id").is(hub_id);
+    Query query = Query.query(criteria);
+    JSONObject jsonObject = mongoTemplate.findOne(query, JSONObject.class, COLLECTION_NAME);
+    
+  标准更新
+    Criteria criteria = Criteria.where("user_id").is(userId).and("hub_id").is(hub_id);
+    Query query = Query.query(criteria);
+    Update update =new Update();
+    update.set("groups",groupArray);
+    mongoTemplate.updateFirst(query, update, COLLECTION_NAME );
+    
+     //如果Update 没有set 值，更新的时候会把所有的值都冲掉
+      mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
+    注：mongo的更新有一个坑，如果update中没有设置值，将会更新整个文档
+    
+    Criteria criteria = Criteria.where("user_id").is(userId).and("hub_id").is(hub_id);
+    criteria.and("scenes").elemMatch(Criteria.where("scene_id").is(scene_id));
+    
+  在Mongo中更新数组
+  
+    //"scenes.$.scene 这个$ 就是更新数组的关键语法
+  
+    Criteria criteria = Criteria.where("user_id").is(userId).and("hub_id").is(hub_id);
+    criteria.and("scenes").elemMatch(Criteria.where("scene_id").is(scene_id));
+        
+    Update update = new Update();
+    boolean flag = false;
+    //scene 是可选字段，如果传入将scene 整个替换
+    if (null!=data.get("scene")){
+        update.set("scenes.$.scene", data.get("scene"));
+        flag=true;
+    }
+    if (null != data.get("name")){
+        update.set("scenes.$.name", data.get("name"));
+        flag = true;
+    }
+    if(data.get("icon") != null){
+        update.set("scenes.$.icon", data.get("icon"));
+        flag = true;
+    }
+    if (flag){
+        mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
+    }
+    
+    
+    
+ 删除操作：
+        WriteResult writeResult = mongoTemplate.remove(query, COLLECTION_NAME);
+        if (writeResult.getN()==1){
+        }
+        
+  还有好多的模板方法可以自行查看      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
