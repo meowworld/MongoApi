@@ -1,0 +1,61 @@
+在SpringBoot，我们很多时候需要加载properties文件作为一些配置文件，并加入到容器中。
+在需要的时候自动注入就可以使用
+
+下面是我自己的demo
+
+1.在resource文件夹下建一个my.properties
+#meow properties
+name=hahah
+age=18
+
+2.#配置类：加载工具类用的是spring自带的
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public MessageConfig loadProperties(){
+        Properties properties =null;
+        try {
+            properties = PropertiesLoaderUtils.loadProperties(new UrlResource("classpath:my.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Map<String,String> map = new HashMap<>();
+        properties.entrySet().forEach(entryset ->{
+            String key = (String)entryset.getKey();
+            String value = (String) entryset.getValue();
+            map.put(key, value);
+        });
+
+        MessageConfig messageConfig = new MessageConfig();
+        messageConfig.setMessageMap(map);
+        return messageConfig;
+    }
+
+3.信息实体
+public class MessageConfig {
+
+    private Map<String,String> messageMap;
+
+    public Map<String, String> getMessageMap() {
+        return messageMap;
+    }
+
+    public void setMessageMap(Map<String, String> messageMap) {
+        this.messageMap = messageMap;
+    }
+}
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+
+--------嘻嘻--------
+
