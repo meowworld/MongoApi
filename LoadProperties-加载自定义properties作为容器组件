@@ -81,3 +81,94 @@ public class TestController {
   
 --------嘻嘻--------
 
+#todo：扩展一个key对应多个value，可能会有这种情况
+
+1.在resource文件夹下建一个my.properties，多个值之间用逗号分隔
+#meow properties
+name=\meow,\Mr.wang
+age=\18,\28
+
+package com.example.anno.config;
+
+2.配置类
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public MessageConfig loadProperties(){
+        Properties properties =null;
+        try {
+            properties = PropertiesLoaderUtils.loadProperties(new UrlResource("classpath:my.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        MultiValueMap<String,String> map = new LinkedMultiValueMap<>();
+        for (Map.Entry<?, ?> entry : properties.entrySet()) {
+            String key = ((String) entry.getKey()).trim();
+            for (String value : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
+                map.add(key, value.trim());
+            }
+        }
+
+        MessageConfig messageConfig = new MessageConfig();
+        messageConfig.setMultiValueMap(map);
+        return messageConfig;
+    }
+}
+
+3.信息实体
+public class MessageConfig {
+
+   private MultiValueMap<String,String> multiValueMap;
+
+    public MultiValueMap<String, String> getMultiValueMap() {
+        return multiValueMap;
+    }
+
+    public void setMultiValueMap(MultiValueMap<String, String> multiValueMap) {
+        this.multiValueMap = multiValueMap;
+    }
+}
+
+4.打印
+@RestController
+@RequestMapping("/test")
+public class TestController {
+
+    @Autowired
+    private MessageConfig messageConfig;
+
+    @GetMapping("/hello")
+    public String hello(Person person){
+        System.out.println("ok，校验通过");
+        MultiValueMap<String, String> multiValueMap = messageConfig.getMultiValueMap();
+        System.out.println(multiValueMap.toString());
+        return "OK";
+    }
+}
+
+5.console
+{age=[18, 28], name=[meow, Mr.wang]}
+
+
+
+
+
+
+
+
+
+
+
