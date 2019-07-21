@@ -9,6 +9,17 @@ name=hahah
 age=18
 
 2.#配置类：加载工具类用的是spring自带的
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 @Configuration
 public class AppConfig {
 
@@ -46,16 +57,27 @@ public class MessageConfig {
     }
 }
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.UrlResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
+4.使用自动注入
+@RestController
+@RequestMapping("/test")
+public class TestController {
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+    @Autowired
+    private MessageConfig messageConfig;
 
+    @GetMapping("/hello")
+    public String hello(Person person){
+        System.out.println("ok，校验通过");
 
+        Map<String, String> messageMap = messageConfig.getMessageMap();
+
+        System.out.println(messageMap.toString());
+
+        return "OK";
+    }
+    
+  5.控制台
+  {name=hahah, age=18}
+  
 --------嘻嘻--------
 
