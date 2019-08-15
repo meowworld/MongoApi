@@ -110,7 +110,10 @@ public class AppConfig {
     public MessageConfig loadProperties(){
         Properties properties =null;
         try {
-            properties = PropertiesLoaderUtils.loadProperties(new UrlResource("classpath:my.properties"));
+            <!--这样读取中文会出现乱码 Properties 默认是按ISO-8859-1读取properties = PropertiesLoaderUtils.loadProperties(new UrlResource("classpath:my.properties")); -->
+            
+            EncodingResorce resource = new EncodingResoure(new UrlResource("classpath:my.properties"),"UTF-8")
+            properties = PropertiesLoaderUtils.loadProperties(resource);//这样就OK啦
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -161,6 +164,8 @@ public class TestController {
 
 5.console
 {age=[18, 28], name=[meow, Mr.wang]}
+
+#注意：Properties 默认是按ISO-8859-1读取
 
 
 
